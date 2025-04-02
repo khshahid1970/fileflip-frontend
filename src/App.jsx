@@ -1,16 +1,29 @@
 import React, { useEffect, useState } from 'react';
 
 function App() {
-  const [message, setMessage] = useState('Connecting to backend...');
+  const [message, setMessage] = useState('Connecting...');
 
   useEffect(() => {
-    fetch('https://fileflip-backend.onrender.com/')
-      .then(res => res.json())
-      .then(data => setMessage(data.message || 'Connected!'))
-      .catch(err => {
-        console.error("Error:", err);
-        setMessage('❌ Error connecting to backend.');
-      });
+    const fetchBackend = async () => {
+      try {
+        // wait 2 seconds in case backend is waking up
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const response = await fetch('https://fileflip-backend.onrender.com/');
+        const data = await response.json();
+
+        if (data.message) {
+          setMessage(data.message);
+        } else {
+          setMessage('Connected, but unexpected response!');
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+        setMessage('❌ Failed to connect to backend.');
+      }
+    };
+
+    fetchBackend();
   }, []);
 
   return (
